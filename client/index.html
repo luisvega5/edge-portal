@@ -1,0 +1,76 @@
+<!-- index.html v1.0.0 -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Edge Portal</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <main class="page">
+    <section class="pane">
+      <header class="pane-head">
+        <div>
+          <h1>Temperature</h1>
+          <p class="subtitle">Start/stop collection and view the latest reading.</p>
+        </div>
+        <div class="pill" id="statePill" data-state="stopped">Stopped</div>
+      </header>
+
+      <section class="card">
+        <div class="card-title">Latest reading</div>
+        <div class="reading">
+          <div class="reading-value">
+            <span id="tempValue">--</span>
+            <span class="unit" id="tempUnit">C</span>
+          </div>
+          <div class="reading-meta">
+            <span class="muted">Timestamp:</span>
+            <span id="tempTs">--</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="actions">
+        <button class="btn primary" id="startBtn">Start Collection</button>
+        <button class="btn" id="stopBtn" disabled>Stop Collection</button>
+        <button class="btn" id="readOnceBtn">Read Once</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="controls">
+        <div class="field">
+          <label for="interval">Auto-refresh (seconds)</label>
+          <input id="interval" type="number" min="1" step="1" value="2" />
+        </div>
+        <div class="field">
+          <label for="units">Display units</label>
+          <select id="units">
+            <option value="C" selected>C</option>
+            <option value="F">F</option>
+          </select>
+        </div>
+      </div>
+
+      <p class="tip">
+        Tip: "Start Collection" polls the backend periodically. "Read Once" takes a single measurement.
+      </p>
+
+      <section class="activity">
+        <div class="activity-head">
+          <div>
+            <h2>Activity</h2>
+            <p class="subtitle">Local UI log of actions and results.</p>
+          </div>
+          <button class="btn small" id="clearLogBtn">Clear</button>
+        </div>
+        <div class="log" id="log"></div>
+      </section>
+    </section>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
