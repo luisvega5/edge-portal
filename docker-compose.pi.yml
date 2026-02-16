@@ -1,0 +1,26 @@
+services:
+  # ---------------------------------------------------------
+  # Edge Portal: The "Official" Version from GitHub
+  # ---------------------------------------------------------
+  edge-portal:
+    # Uses the VERSION variable if provided, otherwise defaults to 'latest'
+    image: ghcr.io/luisvega5/edge-portal:${VERSION:-latest}
+    container_name: edge-portal
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    # No profile here: 'docker compose up -d' works by default
+
+  # ---------------------------------------------------------
+  # Edge Portal Dev: For local testing/hacking on the Pi
+  # ---------------------------------------------------------
+  edge-portal-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: edge-portal:local
+    container_name: edge-portal-dev
+    restart: unless-stopped
+    ports:
+      - "8001:8000" # Use 8001 to avoid colliding with the 'Official' version
+    profiles: ["dev"] # Only starts if they run: docker compose --profile dev up
