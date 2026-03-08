@@ -30,6 +30,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # -------------------------
+      # edge-portal tags
+      # -------------------------
       - name: Docker metadata (edge-portal)
         id: meta_portal
         uses: docker/metadata-action@v5
@@ -49,5 +52,30 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta_portal.outputs.tags }}
           labels: ${{ steps.meta_portal.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # -------------------------
+      # aht30-daemon tags
+      # -------------------------
+      - name: Docker metadata (aht30-daemon)
+        id: meta_aht30
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/aht30-daemon
+          tags: |
+            type=semver,pattern=v{{version}}
+            type=sha,prefix=
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+
+      - name: Build and push aht30-daemon (multi-arch)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./daemons/aht30/Dockerfile
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.meta_aht30.outputs.tags }}
+          labels: ${{ steps.meta_aht30.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

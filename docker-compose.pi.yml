@@ -1,19 +1,38 @@
 services:
-  # ---------------------------------------------------------
-  # Edge Portal: The "Official" Version from GitHub
-  # ---------------------------------------------------------
+  aht30-daemon:
+    image: ghcr.io/luisvega5/aht30-daemon:${VERSION:-latest}
+    container_name: aht30-daemon
+    restart: unless-stopped
+    devices:
+      - "/dev/i2c-1:/dev/i2c-1"
+    profiles: ["prod"]
+
   edge-portal:
-    # Uses the VERSION variable if provided, otherwise defaults to 'latest'
     image: ghcr.io/luisvega5/edge-portal:${VERSION:-latest}
     container_name: edge-portal
     restart: unless-stopped
     ports:
       - "8000:8000"
-    # No profile here: 'docker compose up -d' works by default
+    environment:
+      - TEMP_DAEMON_URL=http://aht30-daemon:7070
+    depends_on:
+      - aht30-daemon
+    profiles: ["prod"]
 
-  # ---------------------------------------------------------
-  # Edge Portal Dev: For local testing/hacking on the Pi
-  # ---------------------------------------------------------
+  aht30-daemon-dev:
+    build:
+      context: .
+      dockerfile: daemons/aht30/Dockerfile
+    container_name: aht30-daemon-dev
+    restart: unless-stopped
+    devices:
+      - "/dev/i2c-1:/dev/i2c-1"
+    profiles: ["dev"]
+    networks:
+      default:
+        aliases:
+          - aht30-daemon
+
   edge-portal-dev:
     build:
       context: .
@@ -22,5 +41,9 @@ services:
     container_name: edge-portal-dev
     restart: unless-stopped
     ports:
-      - "8001:8000" # Use 8001 to avoid colliding with the 'Official' version
-    profiles: ["dev"] # Only starts if they run: docker compose --profile dev up
+      - "8001:8000"
+    environment:
+      - TEMP_DAEMON_URL=http://aht30-daemon:7070
+    depends_on:
+      - aht30-daemon-dev
+    profiles: ["dev"]
