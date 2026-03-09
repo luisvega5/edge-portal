@@ -1,4 +1,4 @@
-name: Build and Publish Docker Image (GHCR)
+name: Build and Publish Docker Images (GHCR)
 
 on:
   push:
@@ -79,3 +79,29 @@ jobs:
           labels: ${{ steps.meta_aht30.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      # -------------------------
+      # video-daemon tags (v1.0.2)
+      # -------------------------
+      - name: Docker metadata (video-daemon)
+        id: meta_video
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/video-daemon
+          tags: |
+            type=semver,pattern=v{{version}}
+            type=sha,prefix=
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+
+      - name: Build and push video-daemon (arm64)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./daemons/video/Dockerfile
+          push: true
+          platforms: linux/arm64
+          tags: ${{ steps.meta_video.outputs.tags }}
+          labels: ${{ steps.meta_video.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+

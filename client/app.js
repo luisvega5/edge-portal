@@ -109,6 +109,87 @@ function rearmIfRunning() {
   startCollection();
 }
 
+/* =========================
+   Camera / Video (v1.0.2)
+   Live MJPEG via <img>
+========================= */
+
+const CamState = {
+  DISCONNECTED: "disconnected",
+  CONNECTING: "connecting",
+  STREAMING: "streaming",
+  ERROR: "error",
+};
+
+let camState = CamState.DISCONNECTED;
+
+function setCamState(state, statusText) {
+  camState = state;
+
+  const pill = $("camStatePill");
+  pill.dataset.state = state;
+
+  const label =
+    state === CamState.DISCONNECTED ? "Disconnected" :
+    state === CamState.CONNECTING ? "Connecting" :
+    state === CamState.STREAMING ? "Streaming" :
+    "Error";
+
+  pill.textContent = label;
+
+  $("camStatusLine").textContent = statusText || "";
+  $("camOverlay").textContent =
+    state === CamState.STREAMING ? "" :
+    state === CamState.CONNECTING ? "Connecting..." :
+    state === CamState.ERROR ? "Error" :
+    "Not connected";
+
+  $("camConnectBtn").disabled = (state === CamState.CONNECTING || state === CamState.STREAMING);
+  $("camDisconnectBtn").disabled = !(state === CamState.CONNECTING || state === CamState.STREAMING);
+
+  // Show/hide overlay cleanly
+  $("camOverlay").style.display = (state === CamState.STREAMING) ? "none" : "grid";
+}
+
+function applyCamView() {
+  const mode = $("camView").value; // "contain" or "cover"
+  $("camMjpeg").style.objectFit = mode;
+  log(`Camera: view set to ${mode}`);
+}
+
+function disconnectCamera() {
+  const img = $("camMjpeg");
+  img.onload = null;
+  img.onerror = null;
+  img.src = ""; // stop the stream request
+
+  setCamState(CamState.DISCONNECTED, "No stream connected.");
+  log("Camera: Disconnected");
+}
+
+function connectCamera() {
+  disconnectCamera(); // reset first
+  setCamState(CamState.CONNECTING, "Connecting to /video/mjpeg ...");
+
+  const img = $("camMjpeg");
+
+  // cache buster prevents “stuck” browser caching
+  const url = "/video/mjpeg" + "?t=" + Date.now();
+
+  img.onload = () => {
+    applyCamView();
+    setCamState(CamState.STREAMING, "Streaming: /video/mjpeg");
+    log("Camera: Connected (MJPEG)");
+  };
+
+  img.onerror = () => {
+    setCamState(CamState.ERROR, "Failed to load MJPEG stream from /video/mjpeg");
+    log("Camera: Connect failed (img error).");
+  };
+
+  img.src = url;
+}
+
 function wireUI() {
   $("readOnceBtn").addEventListener("click", readOnce);
   $("startBtn").addEventListener("click", startCollection);
@@ -127,11 +208,19 @@ function wireUI() {
     rearmIfRunning();
     log(`Auto-refresh set to ${$("interval").value}s`);
   });
+
+  // Camera
+  $("camConnectBtn").addEventListener("click", connectCamera);
+  $("camDisconnectBtn").addEventListener("click", disconnectCamera);
+  $("camView").addEventListener("change", applyCamView);
 }
 
 (async function main() {
   wireUI();
   setState(false);
   log("UI loaded.");
+  // Camera init
+  setCamState(CamState.DISCONNECTED, "No stream connected.");
+  applyCamView();
   await readOnce(); // initial fetch to prove wiring
 })();
