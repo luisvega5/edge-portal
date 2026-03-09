@@ -9,6 +9,9 @@
 </head>
 <body>
   <main class="page">
+    <!-- ===================== -->
+    <!--    Temperature pane   -->
+    <!-- ===================== -->
     <section class="pane">
       <header class="pane-head">
         <div>
@@ -68,6 +71,52 @@
         </div>
         <div class="log" id="log"></div>
       </section>
+    </section>
+    <!-- ===================== -->
+    <!-- Camera / Video pane   -->
+    <!-- ===================== -->
+    <section class="pane">
+      <header class="pane-head">
+        <div>
+          <h1>Camera</h1>
+          <p class="subtitle">Live MJPEG view via the video daemon (proxied by FastAPI).</p>
+        </div>
+        <div class="pill" id="camStatePill" data-state="disconnected">Disconnected</div>
+      </header>
+
+    <section class="card">
+      <div class="card-title">Live view</div>
+
+      <div class="cam-frame">
+        <img id="camMjpeg" alt="MJPEG stream" />
+      <div class="cam-overlay" id="camOverlay">Not connected</div>
+      </div>
+
+      <div class="muted" id="camStatusLine" style="margin-top: 8px;">
+        No stream connected.
+      </div>
+    </section>
+
+    <div class="actions">
+      <button class="btn primary" id="camConnectBtn">Connect</button>
+      <button class="btn" id="camDisconnectBtn" disabled>Disconnect</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="controls">
+      <div class="field" style="grid-column: 1 / -1;">
+        <label for="camView">View</label>
+        <select id="camView">
+          <option value="contain" selected>Fit (contain)</option>
+          <option value="cover">Fill (cover)</option>
+        </select>
+      </div>
+    </div>
+
+    <p class="tip">
+      Stream endpoint: <code>/video/mjpeg</code> (FastAPI proxies the C++ daemon).
+    </p>
     </section>
   </main>
 
