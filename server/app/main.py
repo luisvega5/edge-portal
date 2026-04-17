@@ -7,9 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from fastapi.responses import StreamingResponse
 from pathlib import Path
-from datetime import datetime, timezone
 from pydantic import BaseModel
-import random
 
 app = FastAPI(title="Edge Portal")
 
