@@ -1,0 +1,35 @@
+name: CI-Security
+
+on:
+  pull_request:
+  push:
+    branches: ["main", "feature/**"]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  k8s_yaml:
+    uses: ./.github/workflows/lint-k8s-yaml.yml
+
+  docker_lint:
+    uses: ./.github/workflows/lint-docker.yml
+
+  secrets:
+    uses: ./.github/workflows/secret-scan.yml
+
+  python_lint:
+    uses: ./.github/workflows/lint-python.yml
+
+  python_bandit:
+    needs: python_lint
+    uses: ./.github/workflows/sast-python-bandit.yml
+
+  python_deps:
+    needs: python_bandit
+    uses: ./.github/workflows/deps-python-pip-audit.yml
+
+  trivy_fs:
+    needs: [k8s_yaml, docker_lint, secrets, python_deps]
+    uses: ./.github/workflows/scan-trivy-fs.yml
