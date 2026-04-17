@@ -5,6 +5,10 @@ on:
   push:
     branches: ["main", "feature/**"]
 
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
   k8s_yaml:
     uses: ./.github/workflows/lint-k8s-yaml.yml
