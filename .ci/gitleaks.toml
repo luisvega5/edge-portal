@@ -1,0 +1,10 @@
+title = "edge-portal gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Allow common false positives"
+paths = [
+  "README.md"
+]

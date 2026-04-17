@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: edge-portal
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: edge-portal
+  template:
+    metadata:
+      labels:
+        app: edge-portal
+    spec:
+      serviceAccountName: edge-portal-sa
+      containers:
+        - name: edge-portal
+          image: ghcr.io/luisvega5/edge-portal:v1.0.0
+          ports:
+            - containerPort: 8000
+
+        - name: video-daemon
+          image: ghcr.io/luisvega5/video-daemon:v1.0.2
+          ports:
+            - containerPort: 8080
+
+        - name: aht30-daemon
+          image: ghcr.io/luisvega5/aht30-daemon:v1.0.1
+          ports:
+            - containerPort: 8081
+          volumeMounts:
+            - name: i2c-device
+              mountPath: /dev/i2c-1
+          securityContext:
+              privileged: true
+
+      volumes:
+        - name: i2c-device
+          hostPath:
+            path: /dev/i2c-1
+            type: CharDevice

@@ -11,7 +11,7 @@ services:
   # NEW: video daemon (prod)
   # -------------------------
   video-daemon:
-    image: ghcr.io/YOUR_GITHUB_USERNAME/video-daemon:${VERSION:-latest}
+    image: ghcr.io/luisvega5/video-daemon:${VERSION:-latest}
     container_name: video-daemon
     restart: unless-stopped
 

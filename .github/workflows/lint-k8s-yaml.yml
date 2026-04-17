@@ -1,0 +1,40 @@
+name: Lint-K8s-Yaml
+
+on:
+  workflow_call:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect k8s manifests
+        id: detect
+        run: |
+          if ls k8s/**/*.yaml >/dev/null 2>&1; then
+            echo "has_k8s=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_k8s=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Skip (no k8s yaml)
+        if: steps.detect.outputs.has_k8s == 'false'
+        run: echo "No k8s YAML found under k8s/. Skipping."
+
+      - name: yamllint
+        if: steps.detect.outputs.has_k8s == 'true'
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          config_file: .ci/.yamllint.yaml
+          file_or_dir: k8s
+
+      - name: kubeconform (Kubernetes schema validation)
+        if: steps.detect.outputs.has_k8s == 'true'
+        run: |
+          curl -sSL -o kubeconform.tar.gz https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz
+          tar -xzf kubeconform.tar.gz kubeconform
+          sudo mv kubeconform /usr/local/bin/kubeconform
+
+          # Validate all YAMLs in k8s/
+          find k8s -name "*.yaml" -print0 | xargs -0 -I{} kubeconform -strict -summary {}

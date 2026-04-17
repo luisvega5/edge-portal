@@ -1,0 +1,3 @@
+ignored:
+  - DL3008  # apt-get pinning can be noisy initially
+  - DL3018  # pinning pip versions may be deferred early
